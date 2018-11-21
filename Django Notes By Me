@@ -1,0 +1,3260 @@
+================================================================================================================================================
+
+Installing the Django
+=====================
+
+pip install Django
+
+===============================================================================================================================================
+
+
+Creting the projects
+=====================
+
+django-admin startproject projectsName
+
+
+Ex- 
+
+django-admin startproject mysite
+
+
+mysite/
+	manage.py
+	mysite/
+		__init__.py
+		settings.py
+		urls.py
+		wsgi.py
+
+
+__init__.py
+
+===========
+===========
+
+this empty files tells python that this directory should be considered a python package
+
+
+settings.py
+
+===========
+===========
+
+settings configuration fot this django projects
+
+
+wsgi.py
+
+=======
+=======
+
+this helps to your projects with the web server 
+
+
+
+==============================================================================================================================================
+
+Development Server
+=================
+
+python manage.py runserver
+
+
+===============================================================================================================================================
+
+Creating the App
+================
+================
+
+
+python manage.py startapp Appname
+
+Ex-
+
+python manage.py startapp polls
+
+
+polls/
+
+	__init__.py
+	admin.py
+	apps.py
+	migrations/
+		__init__.py
+		views.py
+		models.py
+		tests.py
+		
+
+
+
+================================================================================================================================================
+
+						Difference Between Project and App
+
+						==================================
+
+a app is a web application that contains records
+
+a project is a collection of configuration and apps for a particular website
+a projects contains multiple apps
+
+
+================================================================================================================================================
+
+Write Your First View
+=====================
+
+				views.py
+				========
+
+
+from django.http import HttpResponse
+
+
+def Message(request):
+	return HttpResponse("This is My First View")
+
+
+
+				polls/ulrs.py
+
+from django.urls import path
+from polls import views
+
+
+urlpatterns=[
+	
+	path('index/',views.Message),
+
+	]
+
+
+
+				mysite/urls.py
+
+
+
+from django.contrib import admin
+from django.urls import path,include
+
+urlpatterns=[
+	path('admin/',admin.site.urls),
+	path('',include('polls.urls'))
+
+	]
+
+
+
+
+==============================================================================================================================================
+
+
+							path()
+						======================
+
+
+path()  function is passed four arguments
+
+two required 
+1-route
+2-views
+
+two optional
+1-kwargs
+2-name
+
+
+
+route
+======
+
+route is string contains a urlpatterns when processing a request,django starts at the first pattern in urlpatterns and makes its ways easy
+
+
+
+view
+=====
+
+when django finds the matching patterns , it calls the specified view function with HttpRequest object
+
+
+kwargs
+======
+
+Arbitary keyword arguments can be passed in a dictionay to target view 
+
+
+name
+=====
+
+naming your url lets you refer to it unambigously from elsewhere in django specially from within templates
+
+
+
+===============================================================================================================================================
+
+
+						Database Setup
+						==============
+					===============================
+
+
+goto the settings.py in your projects
+
+in django bydefault sqlite3 comes
+
+in DATABASE section you can change other databases.....by following changing
+
+ENGINE-
+
+	'django.db.backends.sqlite3',
+	'django.db.backends.postgresql',
+	'django.db.backends.mysql',
+	'django.db.backends.oracle'
+
+
+NAME-
+
+Name of your database 
+if you are using the SQlite, the database will be a file on your computer ex- os.path.join(BASE_DIR,'db.sqlite3')
+
+if you are using the other database then you have to setup USER, PASSWORD,HOST
+
+
+while you are editing your mysite/settings.py , set TIME_ZONE to your time zone
+
+
+
+						INSTALLED_APPS
+						==============
+					===============================
+
+by defaults INSTALLED_APPS contains following apps 
+
+django.contrib.admin		-------Working for Admin Panel
+
+django.contrib.auth		-------for Authentication Only
+
+django.contrib.contettypes	-------a Framework for contenttypes 
+
+django.contrib.sessions		--------A session Framework
+
+django.contrib.messages		--------A messages Frameworks
+
+django.contrib.staticfiles	--------a Framework for managing staticfiles
+
+
+
+===============================================================================================================================================
+
+						Creating the models
+						====================
+
+
+it contains the essential fiels and behaviours of the data you are storing
+
+the goal of model is define data into database
+
+
+							models.py
+						===========================
+
+
+from django.db import models
+
+
+class Employee(models.Model):
+
+    name = models.CharField(max_length=100)
+    address = models.CharField(max_length=100)
+
+    def __str__(self):
+        return self.name
+
+
+class Company(models.Model):
+
+    employee = models.ForeignKey(Employee, on_delete=models.CASCADE)
+    position = models.CharField(max_length=100)
+    department = models.CharField(max_length=100)
+
+
+
+
+each model is represented by class that is subclass of django.db.models.model
+
+each model has a number of class variables ,who represents a database field in a model
+
+each field is represented by a instance of a field class 
+Ex-
+CharField() is character field and also tells types into database
+
+
+
+================================================================================================================================================
+
+
+								Activating Models
+							=================================
+
+first we need to tell our projects that polls app is installed
+
+'polls.apps.PollsConfig'
+
+
+>>>python manage.py makemigrations polls
+
+>>>python manage.py check
+			this will checks that any errors in not occured in our projects
+
+
+							Playing with Api
+						=====================================
+
+
+>>>python manage.py shell
+
+>>>from polls.models import Employee,Company
+
+
+#Creating the Employee
+
+#1st Ways
+
+>>>e1=Employee(name="Mukesh",address="Banglore")
+
+>>>e1.save()
+
+
+#2nd Ways
+
+
+>>>e2=Employee()
+>>>e2.name="Amresh"
+>>>e2.address="Dubai"
+>>>e2.save()
+
+
+
+#Creating the Company with Related Employee
+
+>>>c1=Company(employee=e1,position="Python Developer",department="IT/Software")
+>>>c1.save()
+
+
+>>>c2=Company(employee=2,position="Senior Electercian",department="Electronic")
+>>>c2.save()
+
+
+
+#Accessing the Informations of Employee
+
+>>>Employee.objects.all()		#You Will Get All Employee Name
+
+>>>Employee.objects.get(id=1)		#You will get the first Employee Informations
+
+>>>Employee.objects.filter(name="Mukesh",address="Banglore")		#You will get filtered Employee
+
+
+
+
+#Accessing the Company related with Employee
+
+>>>e1.company_set.all()			#finds with related data of employee
+
+>>>e2.company_set.all()			#finds with related data of employee
+
+
+================================================================================================================================================
+
+
+							Creating the Superuser
+						=======================================
+
+>>>python manage.py createsuperuser
+
+Now you will enter the username, email , password , confirm_password
+
+
+
+							Activating Model on Admin Panel
+						===============================================
+
+goto polls/admin.py
+
+from polls.models import Employee
+
+admin.site.register(Employee)
+
+
+
+===============================================================================================================================================
+
+
+
+							Django Raise Error
+						==============================
+
+#1st Way
+
+polls/views.py
+
+from django.http import Http404
+
+def detail(request,id):
+	try:
+	   employee=Employee.objects.get(id=id)
+
+	except Employee.DoesNotExist:
+		raise Http404("This ID Does't Exist.....")
+
+	return render(......)
+
+
+
+#2nd Way
+
+polls/views.py
+
+from django.shortcuts import get_object_or_404
+
+def detail(request,id):
+
+	employee=get_object_or_404(Employee,id=id)
+	
+	return render(.........................)
+
+
+
+
+Ex--
+
+polls/views.py
+
+
+
+from django.shortcuts import render
+from django.http import Http404
+
+from ForignRelationShip.models import Employee,Company
+
+def EmployeeDetail(request):
+    employee=Employee.objects.all()
+    return render(request,'ForignRelationShip/detail.html',{'employee':employee})
+
+
+def EmployeeID(request,id):
+    try:
+        employee=Employee.objects.get(id=id)
+    except Employee.DoesNotExist:
+        raise Http404("This ID is Not Exist......")
+    return render(request,'ForignRelationShip/id.html',{'employee':employee})
+
+
+
+
+templates/detail.html
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Employee Details........</title>
+</head>
+<body>
+
+{% for e in employee %}
+
+    <a href="/Relation/id/{{ e.id }}">{{ e.name }}</a>
+
+{% endfor %}
+
+</body>
+</html>
+
+
+
+
+templates/id.html
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>ID</title>
+</head>
+<body>
+{% for e1 in employee.company_set.all %}
+    <h1>This Employee Information</h1>
+
+    <h4>Position</h4>-{{ e1.position }}<br>
+    <h4>Department</h4>-{{ e1.department }}<br>
+{% endfor %}
+</body>
+</html>
+
+
+
+
+polls/urls.py
+
+
+from django.urls import path
+from ForignRelationShip import views
+
+urlpatterns=[
+    path('detail/',views.EmployeeDetail),
+    path('id/<int:id>',views.EmployeeID)
+
+]
+
+
+
+
+================================================================================================================================================
+
+
+								Removing the Hardcoded Urls
+
+							================================================
+
+
+
+
+ <a href="/Relation/id/{{ e.id }}">{{ e.name }}</a>
+
+
+
+			OR
+
+
+
+<a href="{% url 'detail' e.id %}">{{e.name}}</a>
+
+
+
+
+in django may be 10,20... apps then how does django differtiate the url names between
+
+
+<a href="{% url 'polls:detail' e.id %}">{{e.name}}</a>
+
+
+
+===============================================================================================================================================
+
+
+							Static Files 
+						===========================
+
+
+
+
+django.contrib.staticfiles  collects all static files from each of your applications
+
+STATICFILES_FINDER setting contains a list of finders that know how to discover static files from various source
+
+APPDirectoriesFinder which looks for static subdirectory in each INSTALLED_APPS
+
+
+Steps--
+
+go to settings.py
+
+
+STATIC_URL = '/static/'		
+
+
+Create static directory
+
+inside static directory put App Name
+
+inside App Name put css files
+
+Ex-
+
+
+static/polls/index.css
+
+
+In Template you have to write 
+
+{%load staticfiles %}
+
+<head>
+<link rel="stylesheet" type="text/css" href="{%static "polls/index.css" %}">
+
+</head>
+
+<body>
+----------
+----------
+</body>
+
+
+
+
+------------------------------------------------------------------------------------------------------------------------------------------------
+
+								Customize the Django Admin
+						===============================================================
+
+
+
+
+#Customizing the Admin panel
+
+class EmployeeAdmin(admin.ModelAdmin):
+    fields = ['name','address']
+    search_fields = ['name']
+    list_display = ('name','address')
+    list_filter = ['name']
+
+
+admin.site.register(Employee,EmployeeAdmin)
+
+
+
+------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+										Models
+						================================================================
+
+
+
+
+model that create data in your datatbase 
+
+Each attribute of model represents a database fields
+
+each model is subclass of django.db.models.Model
+
+model define isdie the models.py
+
+
+Fields Options
+===============
+
+null
+----
+
+if true , dajngo will store empty values as NULL in database , default is False
+
+
+blank
+-----
+if True ,the fields allow to be blank , default is False
+
+
+max_length
+----------
+this specify the strings size
+
+
+choices
+--------
+
+use for show choices 
+
+Ex-
+
+choose_city=(
+
+('BLR','Banglore'),
+("LKO","Lucknow")
+)
+
+
+#first element is each tuple is the value that will be stored is database
+
+#second element is displayed by fields for user
+
+
+
+
+default
+--------
+
+if you want to provide any default value 
+
+
+
+help_text
+---------
+
+extra help will be displayed below the widgets
+
+
+primary_key
+----------
+if True , then this will be considered as primary
+
+if don't specify primary key for any fields in your model django automatically add on integreted  primary key
+
+
+
+unique
+------
+
+if True , this fields will considered as unique
+
+
+
+
+							verbose fiels name
+					=====================================================
+
+
+each field type except ForignKey , ManyToManyField,OneToOneField takes a optional first positional arguments  a verbose name
+
+if verbose name is not given , django will automatically create it using the fields attribute name
+
+Ex-
+
+first_name=models.CharField("Mukesh",max_length=100)
+
+#here verbose name is Mukesh
+
+
+first_name=models.CharFields(max_length=100)
+
+#here verbode name is first_name
+
+
+
+
+ForignKey , ManyToManyField,OneToOneField require the first arguments through attribute verbose_name
+
+Ex-
+
+employee = models.ForeignKey(Employee, on_delete=models.CASCADE,verbose_name="Employee")
+
+
+
+------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+							Relationships
+					--------------------------------------
+
+
+Many To One 
+============
+
+to define many to one relationship we use django.db.models.ForignKey
+
+
+Ex-
+
+a car and Car-Manufaturer
+
+
+manufaturer makes multiple cars but each car only has one manufaturer 
+
+
+Many to Many
+============
+
+to define many to many we use ManyToManyFields
+
+Ex-
+
+if a pizza has multiple Topping objects ie
+
+a Topping can be Mutliple pizza and each pizza has multiple topping
+
+
+One to One
+==========
+One to one define we use OneToOneField
+
+
+
+model Methods 
+-------------
+
+def __str__(self):
+
+
+def get_absolute_url(self):
+
+
+def save(self)
+
+
+
+
+
+
+
+
+
+-----------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+
+								Model Inheritance
+						====================================================
+
+
+
+
+model inheritance is mostly similer to python inheritance concept 
+
+
+in django 3 styles in inheritance 
+1-Abstract base class 
+2-Multitable inheritance 
+3-proxy mdoels inheritance
+
+
+
+
+
+
+1-Abstract base class inheritance
+=================================
+
+this is useful when you want to put some common information in number of other models
+
+you write your base class and put abstract=True in Meta class
+
+Ex-
+
+class CommonInfo(models.Model):
+
+	name=models.CharField(max_length=100)
+	city=models.CharField(max_length=100)
+	occupation=models.CharField(max_length=100)
+	age=models.CharField(max_length=100)
+
+	class Meta:
+		abstract=True
+
+
+class Employee(CommonInfo):
+	company=models.CharField(max_length=100)
+
+
+#Above example Employee will have 5 fields
+
+
+
+
+2-Multitable  inheritance 
+=======================
+
+each model corresponds to its own database table and can be queried and created individually
+
+The inheritance relationship introduces links between the child model and each of its parents (via an automatically-created
+OneToOneField).
+
+For example:
+
+
+
+class Place(models.Model):
+	name = models.CharField(max_length=50)
+	address = models.CharField(max_length=80)
+
+
+class Restaurant(Place):
+	serves_hot_dogs = models.BooleanField(default=False)
+	serves_pizza = models.BooleanField(default=False
+
+
+
+
+
+
+automatically created OneToOneField on resturant 
+
+	place=models.OneToOneField(Place,on_delete=models.CASCADE)
+
+
+
+
+
+
+
+3-Proxy Models inheritance
+===========================
+
+proxy model inheritance is for: creating a proxy for the original model,You can create, delete and update
+instances of the proxy model and all the data will be saved as if you were using the original (non-proxied) model,
+
+The difference is that you can change things like the default model ordering or the default manager in the proxy, without
+having to alter the original
+
+Proxy models are declared like normal models. You tell Django that it’s a proxy model by setting the proxy attribute
+of the Meta class to True
+
+
+Ex-
+
+class Person(models.Model):
+	name=models.CharField(max_length=100)
+
+class MyPerson(Person):
+	class Meta:
+		proxy=True
+
+
+Note- When we are using proxy then class should not abstract
+
+
+
+
+
+class Person(models.Model):
+	first_name = models.CharField(max_length=30)
+	last_name = models.CharField(max_length=30)
+
+class MyPerson(Person):
+	class Meta:
+	proxy = True
+
+
+
+>>>python manage.py shell
+>>>from polls.models import *
+>>>p1=Person(first_name="Mukesh",last_name="Yadav")
+>>>p1.save()
+
+>>>Person.objects.all()
+
+<QuerySet [<MyPerson: MyPerson object (1)>]>
+
+
+>>>MyPerson.objects.all()
+
+<QuerySet [<MyPerson: MyPerson object (1)>]>
+
+
+
+>>>p2=MyPerson(first_name="Amresh",last_name="Yadav")
+>>>p2.save()
+
+
+>>>Person.objects.all()
+
+<QuerySet [<Person: Person object (1)>, <Person: Person object (2)>]>
+
+
+>>>MyPerson.objects.all()
+
+
+<QuerySet [<Person: Person object (1)>, <Person: Person object (2)>]>
+
+
+
+------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+								Managers
+						======================================
+
+
+
+
+manager is interface through which database query provided to django mdoels 
+
+at least one manager exists for every models
+
+by default manager names are objects to every django model class 
+
+
+>>>Person.objects.all()
+
+
+
+Custom manager
+==============
+
+You can use a custom Manager in a particular model by extending the base Manager class and instantiating your
+custom Manager in your model
+
+There are two reasons you might want to customize a Manager:
+	 to add extra Manager methods
+		or
+	 to modify the initial QuerySet the Manager returns
+
+
+
+Adding extra manager methods
+============================
+
+A custom Manager method can return anything you want
+
+
+
+Ex-
+
+
+
+#Creating the Custom Model Manager
+
+class PersonManager(models.Manager):
+
+    def get_queryset(self):
+        return super().get_queryset().all()
+
+
+
+class Person(models.Model):
+    first_name=models.CharField(max_length=100)
+    last_name = models.CharField(max_length=100)
+    persons=PersonManager()
+
+
+
+
+
+
+>>>python manage.py shell
+>>>from polls.models import *
+>>>Person.persons.all()
+
+<QuerySet [<Person: Person object (1)>, <Person: Person object (2)>]>
+
+
+>>>Person.objects.all()
+
+Traceback (most recent call last):
+  File "<console>", line 1, in <module>
+AttributeError: type object 'Person' has no attribute 'objects'
+
+
+------------------------------------------------------------------------------------------------------------------------------------------------
+
+Performing raw SQL queries
+===========================
+
+
+Django gives you two ways of performing raw SQL queries:
+		 you can use Manager.raw() to perform raw queries and return model instances
+				 	or
+		 you can avoid the model layer entirely and execute custom SQL directly
+
+
+
+By SQL raw()
+-------------
+
+for p in Person.objects.raw('SELECT * FROM myapp_person'):
+						print(p)
+
+
+
+By SQL Directly
+---------------
+
+>>>python manage.py shell
+
+>>>Person.persons.all().query
+
+
+
+-----------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+								Multiple databases
+						--------------------------------------------------
+
+
+django supports multiple databases.....
+
+
+DATABASES = {
+	'default': {
+		'NAME': 'app_data',
+		'ENGINE': 'django.db.backends.postgresql',
+		'USER': 'postgres_user',
+		'PASSWORD': 's3krit'
+},
+
+	'users': {
+		'NAME': 'user_data',
+		'ENGINE': 'django.db.backends.mysql',
+		'USER': 'mysql_user',
+		'PASSWORD': 'priv4te'
+},
+
+	'customers': {
+		'NAME': 'customer_data',
+		'ENGINE': 'django.db.backends.mysql',
+		'USER': 'mysql_cust',
+		'PASSWORD': 'veryPriv@ate'
+
+}
+
+}
+
+
+
+
+Note-
+
+migrate command work only for one database ie. Default
+
+>>>python manage.py makemigrations
+>>>python manage.py migrate
+
+
+to migrate other database we will use  --database
+
+>>>python manage.py migrate --database=users
+
+>>>python manage.py migrate --database=customers
+
+
+
+
+
+-----------------------------------------------------------------------------------------------------------------------------------------------
+
+
+Syntax of the urlpatterns variable
+
+
+
+urlpatterns should be a Python list of path() and/or re_path() instances.
+
+
+----------------------------------
+
+from django.urls import path
+
+
+urlpatterns=[
+    path(...............),
+]
+
+
+----------------------------------
+
+
+from django.urls import re_path
+
+
+
+urlpatterns=[
+    re_path(r'^...............$'),
+]
+
+
+------------------------------------------------------------------------------------------------------------------------------------------------
+
+Error handling
+===============
+
+When Django can’t find a match for the requested URL, or when an exception is raised, Django invokes an error-handling view
+
+
+The views to use for these cases are specified by four variables
+
+
+The variables are:
+
+
+• handler400 –  django.conf.urls.handler400
+• handler403 –  django.conf.urls.handler403
+• handler404 –  django.conf.urls.handler404
+• handler500 –  django.conf.urls.handler500
+
+
+
+
+
+Decorators
+===========
+
+
+Django provides several decorators that can be applied to views to support various HTTP features
+
+
+
+1--Allowed HTTP methods
+========================
+
+
+The decorators in django.views.decorators.http can be used to restrict access to views based on the request method
+
+These decorators will return a django.http.HttpResponseNotAllowed if the conditions are not met
+
+
+
+require_http_methods(request_method_list)
+
+Decorator to require that a view only accepts particular request methods
+
+
+from django.views.decorators.http import require_http_methods
+
+@require_http_methods(["GET", "POST"])
+def my_view(request):
+
+	-----------------
+	-----------------
+	-----------------
+	-----------------
+
+
+Note-request methods should be in uppercase
+
+
+
+require_GET()
+
+Decorator to require that a view only accepts the GET method
+
+
+require_POST()
+
+Decorator to require that a view only accepts the POST method
+
+
+
+require_safe()
+
+Decorator to require that a view only accepts the GET and HEAD methods. These methods are commonly considered “safe” 
+because they should not have the significance of taking an action other than retrieving the requested resource
+
+
+
+
+
+
+2--Conditional view processing
+===============================
+
+decorators in django.views.decorators.http
+
+condition(etag_func=None, last_modified_func=None)
+
+
+
+3--GZip compression
+===================
+
+The decorators in django.views.decorators.gzip control content compression on a per-view basis.
+
+gzip_page()
+
+This decorator compresses content if the browser allows gzip compression
+
+
+
+
+4--Vary headers
+================
+
+The decorators in django.views.decorators.vary can be used to control caching based on specific request headers
+
+vary_on_cookie(func)
+
+vary_on_headers(*headers)
+
+The Vary header defines which request headers a cache mechanism should take into account when building its
+cache key
+
+
+5--Caching
+
+The decorators in django.views.decorators.cache control server and client-side caching.
+
+cache_control(**kwargs)
+
+This decorator patches the response’s Cache-Control header by adding all of the keyword arguments to it.
+
+See patch_cache_control() for the details of the transformation.
+
+never_cache(view_func)
+
+This decorator adds a Cache-Control: max-age=0, no-cache, no-store,must-revalidate header to a response to indicate that a page should never be cached
+
+
+-----------------------------------------------------------------------------------------------------------------------------------------------
+
+								Middleware
+							=========================
+
+
+middleware is light frameworks that hooks request/response  between user 
+
+it create the authentication between user
+
+
+
+
+MIDDLEWARE = [
+    'django.middleware.security.SecurityMiddleware',
+    'django.contrib.sessions.middleware.SessionMiddleware',
+    'django.middleware.common.CommonMiddleware',
+    'django.middleware.csrf.CsrfViewMiddleware',
+    'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'django.contrib.messages.middleware.MessageMiddleware',
+    'django.middleware.clickjacking.XFrameOptionsMiddleware',
+]
+
+
+
+
+Writing your own middleware
+----------------------------
+
+
+
+def __init__(self,get_response):
+		self.get_response=get_response
+
+
+def __call__(self,request):
+
+		response=self.get_response(request)
+		return reponse
+
+
+
+
+• Django initializes your middleware with only the get_response argument, so you can’t define __init__() as requiring any other arguments.
+
+• Unlike the __call__() method which is called once per request, __init__() is called only once, when the Web server starts
+
+
+
+
+
+other middleware hooks 
+-----------------------
+
+3 special methods to class based middleware
+
+1-process_veiw()
+
+2-process_exception()
+
+3-process_template_response()
+
+
+
+
+
+
+How to use sessions
+--------------------
+
+In middleware go & write 
+
+	django.contrib.sessions.middleware.SessionMidleware
+
+
+Configure the session Engine
+-----------------------------
+
+
+By default django stores sessions in your database using (django.contrib.sessions.models.Session)
+
+
+
+Using database backend sessions
+--------------------------------
+
+if you want to database backend session you need to add  'django.contrib.session' in INSTALLED APPS
+
+
+  
+Using cached sessions
+----------------------
+
+"django.contrib.sessions.backends.cached_db"
+
+
+
+
+
+Using file-based sessions
+--------------------------
+
+
+"django.contrib.sessions.backends.file"
+
+
+
+
+Using cookie-based sessions
+---------------------------
+
+
+"django.contrib.sessions.backends.signed_cookies"
+
+
+
+
+
+Session serialization
+----------------------
+
+
+By default, Django serializes session data using JSON. You can use the SESSION_SERIALIZER setting to customize the session serialization format
+
+
+
+
+Bundled serializers
+--------------------
+
+class serializers.JSONSerializer
+
+
+A wrapper around the JSON serializer from django.core.signing. Can only serialize basic data type
+
+
+
+
+------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+									Working with forms
+								=======================================
+
+
+
+forms may be bound or unbound
+
+if its bound to set a data , its capble of validating that data and rendering the form as HTML with data displayed
+
+if  its unbound , it cannot validate because no data availble but it can still render  blank form as html
+
+to create an unbounded form instance simply instatiate a class
+
+ex-
+
+>>>f=ContactForm()
+
+to bind a data to a form , pass the data as dictionary form 
+
+>>>data={"name":"Mukesh","city":"Banglore"}
+
+>>>f=ContactForm(data)
+
+
+
+is_bound
+--------
+
+if you need to check bound and unbound form insatnce at runtime use this attribute
+
+>>>f=ContactForm()
+>>>f.is_bound			#False
+
+
+>>>f=ContactForm(data)
+>>>f.is_bound			#True
+
+
+
+Note that passing an empty dictionary create a bound form with empty data
+
+>>>f=ContactForm({})
+>>>f.is_bound			#True
+
+
+
+
+Using form functions to Validate data
+--------------------------------------
+
+
+clean()
+-------
+
+implement a clean() method on your form when you must add custom validation form fields that are implemented
+
+
+
+is_valid()
+----------
+
+primary task of form object is to validate data with bound form instance call the is_valid() method to run validation and return a boolean designing whether data is valid
+
+
+>>>data=ContactForm("name":"Mukesh","city":"Banglore")
+
+>>>data.is_valid()		#True
+
+
+Lets Try with some Invalid Data
+
+>>>data={"name":"Mukesh","city":""}
+>>>f=ContactForm(data)
+>>>f.is_valid			#False
+
+
+
+errors()
+--------
+
+>>>f=ContactForm({"name":"","city":"Banglore"})
+>>f.erros()		#{'name':['This Field is required']}
+
+
+
+
+as_jason()
+----------
+
+get_json_data()
+---------------
+
+add_error(field,error)
+----------------------
+this method allows adding errors to specific field 
+
+
+has_error(field,code=None)
+--------------------------
+
+check error in particular field error availble or not
+
+
+non_field_errors()
+------------------
+
+this method returns the list of element from Form.errors that are not associated with particular field
+
+
+
+Accessig fields from the form
+------------------------------
+
+
+fields
+-------
+
+you can access fields of form instance from its fields attribute
+
+>>>print(data)
+
+>>>as_p()
+
+>>>as_table()
+
+>>>as_ul()
+
+
+
+
+
+Accessing 'clean' data
+-----------------------
+
+cleaned_data
+-------------
+
+once you have created a Form instance with a set of data and validated it 
+
+you can access the clean data via its cleaned_data attribute
+
+
+
+	
+
+BoundField
+-----------
+
+as_p() ,as_table(),as_ul() is only method to display , instead of this there are various method availble
+
+
+class boundfield used to display html or access attribute for a single field of a form instnace
+
+
+
+to reterive a single BoundField objects
+
+>>>print(form['name'])
+
+
+to reterive all BoundField objects
+
+
+>>>for form in f:
+		print(form)
+
+
+
+
+
+Attribute of Boundfield
+-----------------------
+
+
+auto_id
+
+data
+
+errors
+
+help_text
+
+html_name
+
+id_for_label
+
+is_hidden 
+
+label
+
+
+
+
+Binding uploaded files to a form
+
+<form method="post" enctype="multipart/form-data" action=''>
+{%csrf_token%}
+--------------
+--------------
+-------------
+</form>
+
+
+>>>form=ConctactForm(request.POST,request.FILES)
+
+
+-----------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+								Formfields
+
+							------------------------------
+
+
+
+
+core fields arguments
+----------------------
+
+required
+
+label
+
+label_suffix
+
+initial
+--------
+initial arguments is used to specify the intial value to use when this field in a unbounded form
+
+
+widget
+
+help_text
+
+error_messages
+
+validators
+
+localize
+
+disabled
+
+
+
+
+Built in Field Classess
+------------------------
+
+
+BooleanField()
+
+CharField()
+
+ChoiceField()
+
+TypedChoiceField()
+
+DateField()
+
+DateTimeField()
+
+DecimalField()
+arguements are max_value , min_value , max_digit_required ,invalid , max_decimal_places,max_whole_digits
+
+
+DurationField()
+
+EmailField()
+
+FileFild()
+
+FilePathField()
+
+FloatField()
+
+IntegerField()
+
+GenericIPAddressField()
+
+MultipleChoiceField()
+
+TypedMultipleChoiceField()
+
+NullBooleanField()
+
+RegexField()
+
+SlugField()
+
+TimeField()
+
+URLField()
+
+ComboField()
+
+MultiValueField()
+
+SplitDataTimeField()
+
+
+fields which handles relationships
+-----------------------------------
+
+ModelChoiceField()
+
+ModelMutlipleChoiceField()
+
+
+
+------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+								Interaction with Model Validation
+							=================================================
+
+
+as we know ModelForm will call clean() method 
+
+this method only each field on your model whom you included 
+
+if you excluded any field clean() method not run to those method
+
+
+
+save() method
+-------------
+
+
+two ways of save method
+
+#1st way
+
+>>>f=ContactForm(request.POST)
+>>>f.save()
+
+
+
+#2nd way
+
+>>>f=Contact.objects.get(id=1)
+>>>f.ContactForm(request.POST,instance=f)
+>>>f.save()
+
+
+
+
+
+This save() method accepts an optional commit keyword , which accepts either True / False
+
+
+if you call save() with commit=False then 
+
+it will return an object that has not yet been saved to database
+
+By Default commit=False
+
+
+
+Another side effect of using commit=False is seen when your model has a MAnyToMAny relation with another model
+
+if your model has many to many relation and you specify commit=False when you save a form
+
+django can not save immedietly save form data for many to many relation
+
+This is beacause it is'not possible to save many to many data for an instance untill instance exist in the database
+
+to work around this problem every time you save a form using commit=False django adds save_m2m() method to your modelForm subclass
+
+
+
+
+Selecting the fields to use
+----------------------------
+
+
+In Django we use fields attribute to selecting the fields
+
+1--fields="__all__"
+
+2--exclude=['data']
+
+
+
+
+
+
+Overriding the Default fields
+-----------------------------
+
+the default field types to specify a custom widget for a field , use widget attribute of inner meta class 
+
+this should be dictionary mapping field names to widget classes or instances 
+
+Ex-
+
+if you want CharField for name attribute of author to represtend by <textarea>  instead of its default <input type="text" >
+
+you can ooverride the field's widget
+
+
+Ex-
+
+from django.forms import ModelForm,Textarea
+
+from .models import Author
+
+
+class AuthorForm(ModelForm):
+
+	class Meta:
+		model=Author
+
+		fields=('name','title')
+
+		widgets={
+			
+			'name':Textarea(attrs={"cols":10},"rows":20)
+			}
+
+
+
+ 
+Simply you  can specify labels , help_text,and error_message
+
+
+
+Enabling localization of fields
+-------------------------------
+
+
+By default the fields in a ModelForm will not localize their data
+
+to enable localization for fields , you can use the localized_fields attribute on meta class
+
+
+Ex--
+
+class Meta:
+	model=Author
+	localized_fields=('place')
+
+		or
+
+	localized_fields="__all__"
+
+
+
+Form Inheriance
+-----------------
+
+
+
+Providing initial values
+-----------------------
+
+
+>>>article=Article.objects.get(id=1)
+>>>article.headline
+
+# "My Headline"
+
+>>>form=AtricleForm(initial={"headline":"Initial Headline"},instance=article)
+
+>>>form['headline'].value()
+
+# "Intial Headline"
+
+
+
+
+
+
+
+------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+								ModelForm Factory
+							===============================
+
+
+you can create forms from a given model using the standalone function mdoelform_factory() instead of using a class defintion
+
+this may be more conveient , if you don't have many customize to make
+
+Ex-
+
+
+from djang.forms import modelform_factory
+
+from .models import Person
+
+
+>>>python manage.py shell
+
+>>PersonForm=modelform_factory(Person,fields=('first_name','last_name'),exclude=('city'),widget={'name':Textarea(attrs={'cols':20,'rows':10})})
+
+
+
+Limiting the Number of Editible objects
+---------------------------------------
+
+
+max_num=
+
+extra=
+
+
+
+
+Using the Model Formset in Views
+--------------------------------
+
+from djang.forms import modelform_factory
+
+from .models import Person
+
+
+
+def personal(request):
+    PersonForm=modelform_factory(Person,fields=('first_name','last_name'))
+    if request.method=="POST":
+        formset=PersonForm(request.POST)
+        if formset.is_valid():
+            formset.save()
+            return HttpResponse("Your Form Filled SuccessFully")
+    else:
+        formset=PersonForm()
+    return render(request,'ForignRelationShip/personal.html',{'formset':formset})
+
+
+
+
+
+personal.html
+
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Personal Form</title>
+</head>
+<body>
+
+<form method="post">
+    {% csrf_token %}
+    {{ formset }}
+    <button type="submit">Submit</button>
+</form>
+
+</body>
+</html>
+
+
+
+
+
+inline formset
+--------------
+
+class models.BaseInlineFormSet
+
+Inline formsets is a small abstraction layer on top of model formsets.These simplify the case of working with related objects via a foreign key
+
+Suppose you have these two models:
+
+
+from django.db import models
+
+class Author(models.Model):
+
+	name = models.CharField(max_length=100)
+
+class Book(models.Model):
+	
+	author = models.ForeignKey(Author, on_delete=models.CASCADE)
+	title = models.CharField(max_length=100)
+
+
+
+If you want to create a formset that allows you to edit books belonging to a particular author, you could do this
+
+
+
+
+>>>from django.forms import inlineformset_factory
+
+>>>BookFormSet = inlineformset_factory(Author, Book, fields=('title',))
+
+>>>author = Author.objects.get(name='Mike Royko')
+
+>>>formset = BookFormSet(instance=author)
+
+
+
+
+Using an inline formset in a view
+---------------------------------
+
+from django.forms import inlineformset_factory
+
+
+def manage_books(request, author_id):
+
+	author = Author.objects.get(pk=author_id)
+	BookInlineFormSet = inlineformset_factory(Author, Book, fields=('title',))
+	if request.method == "POST":
+		formset = BookInlineFormSet(request.POST, request.FILES, instance=author)
+		if formset.is_valid():
+				formset.save()
+				return HttpResponse("Changing the SuccessFully")
+
+		else:
+			formset = BookInlineFormSet(instance=author)
+	return render(request, 'manage_books.html', {'formset': formset})
+
+
+
+
+Model Form Functions
+--------------------
+
+
+modelform=modelform_factory(model,form='',fields='',exclude='',widgets='',localized_fields='',labels='',help_texts='',error_messages='',field_classes='')
+
+
+
+
+
+modelformset_factoy=modelformset_factory(model,form='',formfield_callback='',formset='',exclude='',fields=,field_classes=,
+                                         can_delete=,can_order=,max_num=,min_num=,widgets=,validate_max=,validate_min=,localized_fields=,
+                                         labels=,error_messages=,field_classes=)
+
+
+
+
+inlinemodel=inlineformset_factory(parent_model=,model=,formset=,fields=,field_classes=,exclude=,max_num=,min_num=,can_order=,
+                                  can_delete=,validate_max=,validate_min=,localized_fields=,labels=,help_texts=,
+                                  error_messages=)
+
+
+
+
+
+-----------------------------------------------------------------------------------------------------------------------------------------------
+
+
+								Templates
+							=========================
+
+
+django conveint way to generate HTML dynamically 
+
+templates contains the static parts of desired HTML
+
+django project can be configured with one or several templates engines 
+
+django ships built in backends for its own templates system  called Django Templates language(DTL)
+
+
+django template language is django's own template system
+
+
+
+
+
+Support for template engines 
+----------------------------
+
+
+templates engine are configured with Templates setting built in backends are
+
+	django.template.backends.django.DjangoTemplate
+
+
+it have two important parts
+
+
+1-- DIRS
+
+
+defines a list of directories where the engine look for template source files , in search order
+
+
+2--APP_DIRS
+
+tells whether the engine shuld look for templates insdie installed Application
+
+
+
+
+
+
+
+Usage--
+
+django.template.loader module defines two functions to load templates
+
+
+get_template(template_name,using=None) 
+
+this function load the template with the given name & returns a Template object
+
+if template cannot be found , it raise TemplateDoesNotExist
+
+
+if template found but contains invalid syntax, it raise TemplteSyntaxError
+
+
+
+
+
+select_template(template_nmae_list,using=None)
+
+
+
+
+it smae like get_template() except only it takes list of templates names
+
+
+it tries each nmae in order and returns the first template that exists
+
+
+
+if loading a templates fails , two exceptions may raise 
+
+
+TemplateDoesNotExist(msg,tried=None,backend=None)
+	this exception is raised when template cannot be found 
+
+
+TemplateSyntaxError(msg)
+
+	this exception is raised when a template was found but conatins errors 
+
+template objects returned by get_template() and select_template() must provide 
+
+render(request,html,context)
+
+
+django shortcuts provide 
+
+render_to_string(request,template,context)
+
+
+Built in Backends 
+------------------
+
+django.template.backends.django.DjangoTemplates
+
+
+Custom backends
+---------------
+
+Debug integretion for custom engines 
+
+1--Template post mortem 
+		post mortem appears when TemplateDoesNotExist is raised 
+
+
+
+2--Contextual InlineInformation
+
+		this have all information in line by line.....
+
+
+
+
+Variable
+--------
+
+{{variables}}
+
+
+variable name consist of any combination of alphnumeric character and underscores 
+
+you can have space and pantuations in variable
+
+
+
+the dot(.) use to access attributes of a variable 
+
+{{account.name}}
+
+
+
+
+
+tags
+-----
+
+{%tags%}
+
+
+{%if....%}
+
+{%elif...%}
+
+{%else.....%}
+
+{%endif....%}
+
+
+
+Comment
+--------
+
+{#comment#}   Single Line
+
+{%comment%}	Multiline 
+
+{%endcomment%}
+
+
+
+
+Template Inheritance
+--------------------
+
+
+
+base.html
+---------
+---------
+
+
+<html>
+<head>
+-------
+-------
+-------
+</head>
+
+<body>
+------
+{%block content%}
+
+
+{%endblock%}
+
+</html>
+
+
+
+index.html
+----------
+----------
+
+
+{%extends 'base.html'%}
+
+{%block content%}
+-------
+-------
+-------
+-------
+{%endblock%}
+
+
+
+ 
+------------------------------------------------------------------------------------------------------------------------------------------------
+
+Automatic HTML Escaping
+
+
+<b>{{name}}</b>
+
+
+<script>alert("Hello")</script>{{name}}
+
+this above user submitted data should not be trusted kindly , this type of security exploit is called Cross Site Scripting(XSS) attack
+
+to avoid this problem have two options
+
+1---you can manke sure to run each untrusted variable through escape filter
+
+ex-
+
+<b>{{name|escape}}</b>
+
+
+
+
+2---You can take the advantage of django Automatic HTML escaping , by default in django , evry template automatically
+
+escapes the output of every variable
+
+espiscially this have five character
+
+
+<	is &lt;
+
+>	is &gt;
+
+'	is &#39;
+
+"	is &quot;
+
+&	is &amp;
+
+
+
+Ex-
+
+&lt;b&gt;{{name}}&lt;/b&gt;			escaped
+
+
+<b>{{name|escape}}</b>				Not escaped
+
+
+
+
+String literals and automatic escaping
+--------------------------------------
+
+{{data|default:"3<2"}}		#bad
+
+{{data|default:"3&lt;2"}}	#good
+
+
+
+
+Accessing method calls
+----------------------
+
+most method calls attached to objects are also  availble from within templates
+
+
+	this means that templates have access to much more than just class attribute and variable passed in from views
+
+	like		entry_set
+
+
+Ex-
+
+{%for comment in task.comment_set.all%}
+
+	{{comment}}
+
+{%endfor%}
+
+
+# for count
+
+
+
+{%for comment in task.comment_set.count%}
+
+	{{comment}}
+
+{%endfor%}
+
+
+
+Custom Tag & filter liberaries
+-------------------------------
+
+certain application provide custom tag & filter liberaries
+
+to access them in template , ensure that application is in INSTALLED_APPS(django.contrib.humanize) & then use load tag in template
+
+{%load humanize%}
+
+{{4500|intcomma}}
+
+
+
+
+
+------------------------------------------------------------------------------------------------------------------------------------------------
+
+							Builtin tag Refernce
+						==================================
+
+
+
+{%block%}
+
+{%comment%}		{#comment#}
+
+{%csrf_token%}
+
+{%cycle '' ''%}
+
+{%debug%}
+
+{%extends %}
+
+filter |  {%filter force_escape|upper%}
+	  {%endfilter%}
+
+
+{%firstof var1 var2 var3%}
+this is equivalent to
+
+{%if var1%}
+	{{var1}}
+
+{%elif var2%}
+	{{var2}}
+
+{%elif var3%}
+	{{var3}}
+
+{%endif%}
+
+
+
+
+{%for...%}	{%endfor%}
+
+
+{%empty%}
+
+{%if....%}
+== 	!=	<	<=	>	>=	in 	notin  	is	isnot	and 	or
+
+
+you can use this operators inside {%if%}
+
+
+
+Complex Expression 
+------------------
+
+
+precedence lowest to highest 
+----------------------------
+
+
+or	and 	not	in	==	!=	<	>	<=	>=
+
+
+{%if a==b or c==d and e%}
+
+(a==b) or ((c==d))	will be iterpret as
+
+
+{%if a>b>c%}		#wrong
+
+{%if a>b and b>c%} 	#right
+
+
+
+
+
+ifequal  and  ifnotequal
+------------------------
+
+{%ifequal a b %}		# {%if a==b %}
+
+{%endifequal%}			#{%endif%}
+
+
+
+{%ifnotequal a b %}		# {%if a!=b %}
+
+{%endifnotequal%}		#{%endif%}
+
+
+
+
+
+{%include%}
+
+
+
+{%lorem%}		{%lorem 3p%}
+
+{%now 'jS-M-Y'%}
+
+
+{%spaceless%}
+
+
+{%tempatetag openblock/closeblock/openvariable/closevariable/openbrace/closebrace/opencomment/closecomment%}
+
+
+{%ul%}
+
+{% verbatim %}	{% endverbatim %}
+
+
+{%widthratio this-value max-value max-width %}
+
+{%endwidth%}
+
+
+-----------------------------------------------------------------------------------------------------------------------------------------------
+
+
+								Migrations
+							=========================
+
+
+Migrations are Django’s way of propagating changes you make to your models (adding a field, deleting a model,etc.) into your database schema.
+
+
+
+>>>python manage.py makemigrations
+
+>>>python manage.py migrate
+
+>>>python manage.py sqlmigrate
+
+
+
+------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+								Testing in Django
+							================================
+
+
+
+>>>python manage.py test
+
+
+
+------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+								User authentication in Django
+							============================================
+
+
+
+
+This document explains the usage of Django’s authentication system in its default configuration. This configuration has evolved to serve the 
+
+most common project needs, handling a reasonably wide range of tasks, and has a careful implementation of passwords and permissions
+
+
+
+User objects
+=============
+
+User objects are the core of the authentication system
+
+Only one class of user exists in Django’s authentication framework
+
+
+i.e., 'superusers' or admin 'staff' users are just user objects with special attributes set, not different classes of user objects
+
+
+The primary attributes of the default user are:
+• username
+• password
+• email
+• first_name
+• last_name
+
+
+
+
+>>>python manage.py createsuperuser
+
+
+
+
+How to log a user log in/out
+
+
+
+from django.contrib.auth import logout
+
+
+urlpatterns=[
+
+	path('login/',views.login),
+	path('logout/',views.logout),
+
+]
+
+
+
+
+
+Limiting access to logged-in users
+-------------------------------------
+
+
+The raw way
+-----------
+
+from django.conf import settings
+from django.shortcuts import redirect
+
+
+def my_view(request):
+
+	if not request.user.is_authenticated:
+
+		return redirect('%s?next=%s' % (settings.LOGIN_URL, request.path))
+
+
+
+. . . or display an error message:
+
+
+
+from django.shortcuts import render
+
+def my_view(request):
+
+	if not request.user.is_authenticated:
+		return render(request, 'myapp/login_error.html')
+
+
+
+
+
+The login_required decorator
+
+login_required(redirect_field_name=’next’, login_url=None)
+
+As a shortcut, you can use the convenient login_required() decorator:
+
+
+
+
+from django.contrib.auth.decorators import login_required
+
+@login_required
+
+def my_view(request):
+------
+------
+
+
+
+
+login_required() does the following:
+
+• If the user isn’t logged in, redirect to settings.LOGIN_URL, passing the current absolute path in the query string.
+
+ Example: /accounts/login/?next=/polls/3/
+ 
+
+
+• If the user is logged in, execute the view normally. The view code is free to assume the user is logged in.
+
+By default, the path that the user should be redirected to upon successful authentication is stored in a query string parameter called "next". 
+
+If you would prefer to use a different name for this parameter, login_required() takes an optional redirect_field_name parameter:
+
+
+
+from django.contrib.auth.decorators import login_required
+
+@login_required(redirect_field_name='my_redirect_field')
+
+def my_view(request):
+...
+---
+
+
+
+login_required() also takes an optional login_url parameter.
+
+Example:
+
+from django.contrib.auth.decorators import login_required
+
+@login_required(login_url='/accounts/login/')
+
+def my_view(request):
+...
+---
+
+
+------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+									Django’s cache framework
+								=========================================
+
+
+------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+Cryptographic signing
+======================
+
+The golden rule of Web application security is to never trust data from untrusted sources. Sometimes it can be useful to pass data through an untrusted medium. 
+
+Cryptographically signed values can be passed through an untrusted channel safe in the knowledge that any tampering will be detected.
+
+Django provides both a low-level API for signing values and a high-level API for setting and reading signed cookies,one of the most common uses of signing in Web applications.
+
+
+You may also find signing useful for the following:
+• Generating “recover my account” URLs for sending to users who have lost their password.
+• Ensuring data stored in hidden form fields has not been tampered with.
+• Generating one-time secret URLs for allowing temporary access to a protected resource, for example a down-
+loadable file that a user has paid for.
+
+
+Protecting the SECRET_KEY
+
+
+When you create a new Django project using startproject, the settings.py file is generated automatically and gets a random SECRET_KEY value. 
+
+This value is the key to securing signed data – it is vital you keep this secure,or attackers could use it to generate their own signed values.
+
+
+
+ 
+
+Using the low-level API
+------------------------
+
+Django’s signing methods live in the django.core.signing module. To sign a value, first instantiate a Signer instance
+
+
+
+>>>from django.core.signing import Signer
+
+>>>signer = Signer()
+
+>>>value = signer.sign('My string')
+
+>>>value
+string:GdMGD6HNQ_qdgxYP8yBZAdAIV1w'
+
+
+The signature is appended to the end of the string, following the colon. You can retrieve the original value using the
+unsign method:
+>>> original = signer.unsign(value)
+
+>>> original
+'My string'
+
+
+
+------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+								Sending email
+
+
+
+
+
+Although Python makes sending email relatively easy via the smtplib module,
+
+
+
+Quick example
+--------------
+
+
+
+from django.core.mail import send_mail
+
+send_mail(
+'Subject here',
+'Here is the message.',
+'from@example.com',
+['to@example.com'],
+fail_silently=False,
+)
+
+
+
+
+Ex-
+
+
+
+
+from django.core.mail import BadHeaderError, send_mail
+from django.http import HttpResponse, HttpResponseRedirect
+
+def send_email(request):
+	subject = request.POST.get('subject', '')
+	message = request.POST.get('message', '')
+	from_email = request.POST.get('from_email', '')
+	if subject and message and from_email:
+
+			try:
+				send_mail(subject, message, from_email, ['admin@example.com'])
+				except BadHeaderError:
+				return HttpResponse('Invalid header found.')
+			return HttpResponseRedirect('/contact/thanks/')
+	else:
+
+	# In reality we'd use a form class
+	# to get proper validation errors.
+	return HttpResponse('Make sure all fields are entered and valid.')
+
+
+
+
+
+
+
+
+
+------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+
+							Internationalization and localization
+						========================================================
+
+
+Translation
+===========
+
+
+
+In order to make a Django project translatable, you have to add a minimal number of hooks to your Python code and templates These hooks are called translation strings
+
+Django’s internationalization hooks are on by default, and that means there’s a bit of i18n-related overhead in certain places of framework
+
+If you don’t use internationalization, you should take the two seconds to set USE_I18N=False in your settings file. Then Django will make some optimizations so as not to load the internationalization machinery
+
+
+Specify a translation string by using the function gettext()
+
+
+Ex-
+
+from django.http import HttpResponse
+from django.utils.translation import gettext
+
+def my_view(request):
+	output = gettext("Welcome to my site.")
+	return HttpResponse(output)
+
+
+
+
+
+localization
+=============
+
+
+Django’s formatting system is capable of displaying dates, times and numbers in templates using the format specified for the current locale
+
+
+Enables or disables localization of template variables in the contained bloc
+
+
+{% load l10n %}
+
+{% localize on %}
+{{ value }}
+{% endlocalize %}
+
+
+{% localize off %}
+{{ value }}
+{% endlocalize %}
+
+
+
+------------------------------------------------------------------------------------------------------------------------------------------------
+
+							Logging
+						======================
+
+
+Django uses Python’s builtin logging module to perform system logging. The usage of this module is discussed in detail in Python’s own documentation. However, if you’ve never used Python’s logging framework (or even if you have), here’s a quick prime
+
+
+
+A Python logging configuration consists of four parts:
+• Loggers
+• Handlers
+• Filters
+• Formatters
+
+
+
+Loggers
+========
+
+A logger is the entry point into the logging system. Each logger is a named bucket to which messages can be written for processing
+
+
+• DEBUG: Low level system information for debugging purposes
+• INFO: General system information
+• WARNING: Information describing a minor problem that has occurred.
+• ERROR: Information describing a major problem that has occurred.
+• CRITICAL: Information describing a critical problem that has occurred.
+
+
+Handlers
+=========
+
+The handler is the engine that determines what happens to each message in a logger. It describes a particular logging behavior, such as writing a message to the screen, to a file, or to a network socket
+
+
+
+
+Filters
+========
+
+A filter is used to provide additional control over which log records are passed from logger to handler.
+
+
+
+Formatters
+===========
+
+
+Ultimately, a log record needs to be rendered as text. Formatters describe the exact format of that text. A formatter usually consists of a Python formatting string containing LogRecord attributes;
+
+
+Making logging calls
+====================
+
+The logger instance contains an entry method for each of the default log levels:
+
+• logger.debug()
+• logger.info()
+• logger.warning()
+• logger.error()
+• logger.critical()
+
+
+
+------------------------------------------------------------------------------------------------------------------------------------------------
+
+								Pagination
+							===========================
+
+
+Django provides a few classes that help you manage paginated data that is, data that’s split across several pages, with “Previous/Next”links
+ 
+These classes live in django/core/paginator.py
+
+Ex-
+
+
+>>> from django.core.paginator import Paginator
+
+>>> objects = ['john', 'paul', 'george', 'ringo']
+
+>>> p = Paginator(objects, 2)
+
+>>> p.count
+
+>>> p.num_pages
+
+>>> p.page_range
+
+>> page1 = p.page(1)
+
+>>> page1
+<Page 1 of 2>
+
+>>> page1.object_list
+['john', 'paul']
+
+
+>>> page2 = p.page(2)
+
+>>> page2.object_list
+['george', 'ringo']
+
+>>> page2.has_next()
+False
+
+>>> page2.has_previous()
+True
+
+>>> page2.has_other_pages()
+True
+
+
+
+Ex--
+
+
+from django.core.paginator import EmptyPage, PageNotAnInteger, Paginator
+from django.shortcuts import render
+
+def listing(request):
+	contact_list = Contacts.objects.all()
+	paginator = Paginator(contact_list, 25) # Show 25 contacts per page
+	page = request.GET.get('page')
+	contacts = paginator.get_page(page)
+	return render(request, 'list.html', {'contacts': contacts})
+
+
+
+{% for contact in contacts %}
+{# Each "contact" is a Contact model object. #}
+{{ contact.full_name|upper }}<br>
+...
+{% endfor %}
+<div class="pagination">
+<span class="step-links">
+{% if contacts.has_previous %}
+<a href="?page=1">&laquo; first</a>
+<a href="?page={{ contacts.previous_page_number }}">previous</a>
+{% endif %}
+<span class="current">
+Page {{ contacts.number }} of {{ contacts.paginator.num_pages }}.
+</span>
+{% if contacts.has_next %}
+<a href="?page={{ contacts.next_page_number }}">next</a>
+<a href="?page={{ contacts.paginator.num_pages }}">last &raquo;</a>
+{% endif %}
+</span>
+</div
+
+
+
+
+
+------------------------------------------------------------------------------------------------------------------------------------------------
+
+								Security in Django
+							==================================
+
+
+Cross site scripting (XSS) protection
+
+XSS attacks allow a user to inject client side scripts into the browsers of other users. This is usually achieved by
+storing the malicious scripts in the database where it will be retrieved and displayed to other users, or by getting users
+to click a link which will cause the attacker’s JavaScript to be executed by the user’s browse
+
+
+
+Cross site request forgery (CSRF) protection
+
+CSRF attacks allow a malicious user to execute actions using the credentials of another user without that user’s knowl-
+edge or consen
+
+
+
+
+Session security
+
+Similar to the CSRF limitations requiring a site to be deployed such that untrusted users don’t have access to any
+subdomains, django.contrib.sessions
+
+
+
+
+
+
+
+------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+								Performance and optimization
+							============================================
+
+
+
+This document provides an overview of techniques and tools that can help get your Django code running more effi-
+ciently - faster, and using fewer system resources
+
+
+Django tools
+=============
+
+django-debug-toolbar is a very handy tool that provides insights into what your code is doing and how much time it spends doing it. In particular it can show you all the SQL queries your page is generating, and how long each one has taken.		
+
+
+Third-party services
+====================
+
+• Yahoo’s Yslow
+• Google PageSpeed
+
+
+-----------------------------------------------------------------------------------------------------------------------------------------------
+
+							Serializing Django objects
+						============================================
+
+
+Django’s serialization framework provides a mechanism for “translating” Django models into other format
+
+format are xml,json
+
+
+
+Serializing data
+=================
+
+
+from django.core import serializers
+
+data = serializers.serialize("xml", SomeModel.objects.all())
+
+
+Deserializing data
+===================
+
+
+for obj in serializers.deserialize("xml", data):
+
+	do_something_with(obj)
+
+
+
+
+
+-----------------------------------------------------------------------------------------------------------------------------------------------
+							Signals
+						=======================
+
+
+
+Django includes a “signal dispatcher” which helps allow decoupled applications get notified when actions occur else-where in the framework
+
+
+
+• django.db.models.signals.pre_save & django.db.models.signals.post_save
+
+
+• django.db.models.signals.pre_delete & django.db.models.signals.post_delete
+
+
+------------------------------------------------------------------------------------------------------------------------------------------------
+
+							External packages
+						===============================
+
+
+Django ships with a variety of extra, optional tools that solve common problem
+
+
+
+Localflavor
+===========
+
+django-localflavor is a collection of utilities for particular countries and cultures.
+• GitHub
+• Documentation
+• PyPI
+
+
+
+------------------------------------------------------------------------------------------------------------------------------------------------
+
+								Validators
+						========================================
+
+
+Writing validators
+===================
+
+A validator is a callable that takes a value and raises a ValidationError if it doesn’t meet some criteria
+
+
+from django.core.exceptions import ValidationError
+from django.utils.translation import gettext_lazy as _
+
+def validate_even(value):
+	if value % 2 != 0:
+		raise ValidationError(('%(value)s is not an even number'),params={'value': value})
+
+
+
+
+models.py
+---------
+
+rom django.db import models
+
+class MyModel(models.Model):
+	even_field = models.IntegerField(validators=[validate_even])
+
+
+forms.py
+--------
+
+from django import forms
+
+class MyForm(forms.Form):
+	even_field = forms.IntegerField(validators=[validate_even])
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
